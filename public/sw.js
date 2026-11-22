@@ -1,12 +1,14 @@
-const CACHE_NAME = 'life-logbook-shell-v2'
+const CACHE_NAME = 'life-logbook-shell-v3'
+const APP_ROOT = new URL('./', self.registration.scope)
+const INDEX_URL = new URL('index.html', APP_ROOT)
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME)
-    const response = await fetch('/index.html')
-    await cache.put('/index.html', response.clone())
+    const response = await fetch(INDEX_URL)
+    await cache.put(INDEX_URL, response.clone())
     const html = await response.text()
-    const assets = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map((match) => match[1])
+    const assets = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map((match) => new URL(match[1], self.location.origin))
     await Promise.all(assets.map(async (asset) => {
       try {
         const assetResponse = await fetch(asset)
@@ -38,7 +40,7 @@ self.addEventListener('fetch', (event) => {
       if (response.ok) await cache.put(event.request, response.clone())
       return response
     } catch {
-      if (event.request.mode === 'navigate') return (await cache.match('/index.html')) || Response.error()
+      if (event.request.mode === 'navigate') return (await cache.match(INDEX_URL)) || Response.error()
       return Response.error()
     }
   })())

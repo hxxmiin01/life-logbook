@@ -10,5 +10,6 @@ createRoot(document.getElementById('root')).render(
 )
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}))
+  const appBase = import.meta.env.BASE_URL
+  window.addEventListener('load', () => navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase }).catch(() => {}))
 }
